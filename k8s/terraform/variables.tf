@@ -19,3 +19,18 @@ variable "worker_ips" {
 variable "ssh_key" {
   default = ""
 }
+
+variable "rancher_ip" {
+    description = "IP of the Rancher server"
+	  default     = ""
+}
+
+variable "rancher_token" {
+    description = "Token for Rancher access"
+	  default     = ""
+}
+
+variable "rancher_ca_checksum" {
+    description = "CA Checksum for Rancher access"
+	  default     = ""
+}
