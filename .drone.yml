@@ -36,6 +36,8 @@ steps:
         from_secret: TF_VAR_rancher_token
       TF_VAR_worker_ips:
         from_secret: TF_VAR_worker_ips
+      TF_VAR_ssh_key:
+        from_secret: TF_VAR_ssh_key
     commands:
       - mkdir $HOME/.ssh
       - echo "$SSH_KEY" > $HOME/.ssh/id_rsa

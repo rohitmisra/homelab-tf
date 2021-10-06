@@ -15,3 +15,7 @@ variable "worker_ips" {
     type        = list(string)
 	  default     = []
 }
+
+variable "ssh_key" {
+  default = ""
+}
