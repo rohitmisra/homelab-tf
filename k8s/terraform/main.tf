@@ -8,7 +8,6 @@ terraform {
   backend "s3" {
     bucket = "homelab-tf"
     key    = "k8s/state/terraform.tfstate"
-    region = "eu-central-1"
   }
 }
 provider "proxmox" {
