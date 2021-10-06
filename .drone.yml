@@ -19,6 +19,7 @@ steps:
       - echo "$SSH_KEY" > $HOME/.ssh/id_rsa
       - chmod 600 $HOME/.ssh/id_rsa
       - cd k8s/terraform/
+      - terraform init -input=false
       - terraform apply -input=false -auto-approve
 
 trigger:
