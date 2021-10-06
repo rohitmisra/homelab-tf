@@ -60,7 +60,7 @@
     when: ansible_swaptotal_mb > 0
   
   - name: Register with Rancher server
-    command: sudo docker run -d --privileged --restart=unless-stopped --net=host -v /etc/kubernetes:/etc/kubernetes -v /var/run:/var/run  rancher/rancher-agent:v2.5.9 --server https://192.168.178.74 --server https://192.168.178.74 --token 6pxmtnt2pwhqvd62b98zgrvgvr5px957dhjdb6lzh9fppvwk68r66d --ca-checksum 8bfec4a5a0e77aa12d1ffeec3b77c849fff224aae76593c2256152253bccd185 --node-name {{ nodename }} --address {{ nodeip }} --worker
+    command: sudo docker run -d --privileged --restart=unless-stopped --net=host -v /etc/kubernetes:/etc/kubernetes -v /var/run:/var/run  rancher/rancher-agent:v2.5.9 --server {{ rancherip }} --token {{ ranchertoken }} --ca-checksum {{ ranchercachecksum }} --node-name {{ nodename }} --address {{ nodeip }} --worker
     
   handlers:
     - name: docker status
