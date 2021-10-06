@@ -9,12 +9,13 @@ platform:
 
 steps:
 
-  - name: publish
+  - name: provision
     image: rohitmisra44/homelab-pipeline-image
     environment:
       SSH_KEY:
         from_secret: SSH_KEY
     commands:
+      - mkdir $HOME/.ssh
       - echo "$SSH_KEY" > $HOME/.ssh/id_rsa
       - chmod 600 $HOME/.ssh/id_rsa
       - terraform apply -input=false -auto-approve
