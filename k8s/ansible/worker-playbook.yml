@@ -1,0 +1,69 @@
+---
+- hosts: all
+  become: true
+  tasks:
+  - name: Wait for cloud-init / user-data to finish
+    command: cloud-init status --wait
+    changed_when: false
+  - name: Install packages that allow apt to be used over HTTPS
+    apt:
+      name: "{{ packages }}"
+      state: present
+      update_cache: yes
+    vars:
+      packages:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg-agent
+      - software-properties-common
+
+  - name: Add an apt signing key for Docker
+    apt_key:
+      url: https://download.docker.com/linux/ubuntu/gpg
+      state: present
+
+  - name: Add apt repository for stable version
+    apt_repository:
+      repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable
+      state: present
+
+  - name: Install docker and its dependecies
+    apt: 
+      name: "{{ packages }}"
+      state: present
+      update_cache: yes
+    vars:
+      packages:
+      - docker-ce 
+      - docker-ce-cli 
+      - containerd.io
+    notify:
+      - docker status
+
+  - name: Add vagrant user to docker group
+    user:
+      name: vagrant
+      group: docker
+
+  - name: Remove swapfile from /etc/fstab
+    mount:
+      name: "{{ item }}"
+      fstype: swap
+      state: absent
+    with_items:
+      - swap
+      - none
+
+  - name: Disable swap
+    command: swapoff -a
+    when: ansible_swaptotal_mb > 0
+  
+  - name: Register with Rancher server
+    command: sudo docker run -d --privileged --restart=unless-stopped --net=host -v /etc/kubernetes:/etc/kubernetes -v /var/run:/var/run  rancher/rancher-agent:v2.5.9 --server https://192.168.178.74 --server https://192.168.178.74 --token 6pxmtnt2pwhqvd62b98zgrvgvr5px957dhjdb6lzh9fppvwk68r66d --ca-checksum 8bfec4a5a0e77aa12d1ffeec3b77c849fff224aae76593c2256152253bccd185 --node-name {{ nodename }} --address {{ nodeip }} --worker
+    
+  handlers:
+    - name: docker status
+      service: name=docker state=started
+
+
