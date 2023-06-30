@@ -61,6 +61,7 @@
   
   - name: Register with Rancher server
     command: sudo docker run -d --privileged --restart=unless-stopped --net=host -v /etc/kubernetes:/etc/kubernetes -v /var/run:/var/run  rancher/rancher-agent:v2.7.5 --server {{ rancherip }} --token {{ ranchertoken }} --ca-checksum {{ ranchercachecksum }} --node-name {{ nodename }} --address {{ nodeip }} --etcd --controlplane
+    
   handlers:
     - name: docker status
       service: name=docker state=started
