@@ -15,7 +15,7 @@ steps:
       BW_CLIENT_SECRET:
         from_secret: BW_CLIENT_SECRET
     commands:
-      - export BW_SESSION=$(bw login --apikey --clientid $BW_CLIENT_ID --clientsecret $BW_CLIENT_SECRET --raw)
+      - export BW_SESSION=$(bw login --apikey --raw)
 
   - name: fetch-secrets
     image: rohitmisra44/homelab-pipeline-image:1.1.0
