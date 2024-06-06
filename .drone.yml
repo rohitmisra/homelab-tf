@@ -15,7 +15,7 @@ steps:
     commands:
       - mkdir -p /run/secrets
       - |
-        bws list secrets | jq -r '.[] | "export \(.key)=$'\(.value | @sh)'"' > /run/secrets/secrets.env
+        bws list secrets | jq -r '.[] | "export (.key)=$'(.value)'"' > /run/secrets/secrets.env
       - cat /run/secrets/secrets.env  # Debug: Print the contents of the file
       - echo '#!/bin/sh' > /run/secrets/exec_script.sh
       - echo '. /run/secrets/secrets.env' >> /run/secrets/exec_script.sh
