@@ -10,7 +10,7 @@ steps:
   - name: provision
     image: rohitmisra44/homelab-pipeline-image:1.1.0
     environment:
-       BW_CLIENT_ID:
+      BW_CLIENT_ID:
         from_secret: BW_CLIENT_ID
       BW_CLIENT_SECRET:
         from_secret: BW_CLIENT_SECRET
