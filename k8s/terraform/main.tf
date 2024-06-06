@@ -12,16 +12,17 @@ terraform {
 }
 provider "proxmox" {
   pm_api_url        = var.pm_api_url
-  pm_tls_insecure = "true"
-  pm_parallel = 3
+  pm_tls_insecure   = "true"
+  pm_parallel       = 3
 }
 
 resource "proxmox_vm_qemu" "k3s_server" {
   count             = 1
   name              = "kubernetes-master-${count.index}"
-  target_node = "hv-pxe-01"
+  target_node       = var.pm_target_node
+
   # Activate QEMU agent for this VM
-  agent = 1
+  agent             = 1
 
   clone             = "ubuntu-2004-cloudinit-template"
 
@@ -51,16 +52,16 @@ resource "proxmox_vm_qemu" "k3s_server" {
   ipconfig0         = "ip=${var.master_ip}/24,gw=192.168.178.1"
 
   sshkeys = <<EOF
-  ${var.ssh_key}
+  ${var.ssh_pub_key}
   EOF
 
   #creates ssh connection to check when the VM is ready for ansible provisioning
   connection {
-    host = var.master_ip
-    user = "ubuntu"
-    private_key = file(var.ssh_key_location)
-    agent = false
-    timeout = "3m"
+    host        = var.master_ip
+    user        = "ubuntu"
+    private_key = file(var.ssh_pvt_key_location)
+    agent       = false
+    timeout     = "3m"
   }
 
   provisioner "remote-exec" {
@@ -69,7 +70,7 @@ resource "proxmox_vm_qemu" "k3s_server" {
 
   provisioner "local-exec" {
     working_dir = "../ansible/"
-    command = "ansible-playbook --ssh-common-args='-o StrictHostKeyChecking=no' -u ubuntu --key-file ${var.ssh_key_location} -i '${var.master_ip},' master-playbook.yml --extra-vars \"rancherip=${var.rancher_ip} ranchertoken=${var.rancher_token} ranchercachecksum=${var.rancher_ca_checksum} nodename='kubernetes-master-${count.index}' nodeip='${var.master_ip}'\""
+    command     = "ansible-playbook --ssh-common-args='-o StrictHostKeyChecking=no' -u ubuntu --key-file ${var.ssh_pvt_key_location} -i '${var.master_ip},' master-playbook.yml --extra-vars \"rancherip=${var.rancher_ip} ranchertoken=${var.rancher_token} ranchercachecksum=${var.rancher_ca_checksum} nodename='kubernetes-master-${count.index}' nodeip='${var.master_ip}'\""
   }
 
 }
@@ -77,10 +78,10 @@ resource "proxmox_vm_qemu" "k3s_server" {
 resource "proxmox_vm_qemu" "k3s_agent" {
   count             = 2
   name              = "kubernetes-node-${count.index}"
-  target_node = "hv-pxe-01"
+  target_node       = pm_target_node
 
   # Activate QEMU agent for this VM
-  agent = 1
+  agent             = 1
 
   clone             = "ubuntu-2004-cloudinit-template"
 
@@ -115,11 +116,11 @@ resource "proxmox_vm_qemu" "k3s_agent" {
 
   #creates ssh connection to check when the VM is ready for ansible provisioning
   connection {
-    host = var.worker_ips[count.index]
-    user = "ubuntu"
-    private_key = file(var.ssh_key_location)
-    agent = false
-    timeout = "3m"
+    host        = var.worker_ips[count.index]
+    user        = "ubuntu"
+    private_key = file(var.ssh_pvt_key_location)
+    agent       = false
+    timeout     = "3m"
   }
 
   provisioner "remote-exec" {
@@ -128,7 +129,7 @@ resource "proxmox_vm_qemu" "k3s_agent" {
 
   provisioner "local-exec" {
     working_dir = "../ansible/"
-    command = "ansible-playbook --ssh-common-args='-o StrictHostKeyChecking=no' -u ubuntu --key-file ${var.ssh_key_location} -i '${var.worker_ips[count.index]},' worker-playbook.yml --extra-vars \"rancherip=${var.rancher_ip} ranchertoken=${var.rancher_token} ranchercachecksum=${var.rancher_ca_checksum} nodename='kubernetes-worker-${count.index}' nodeip='${var.worker_ips[count.index]}'\""
+    command     = "ansible-playbook --ssh-common-args='-o StrictHostKeyChecking=no' -u ubuntu --key-file ${var.ssh_pvt_key_location} -i '${var.worker_ips[count.index]},' worker-playbook.yml --extra-vars \"rancherip=${var.rancher_ip} ranchertoken=${var.rancher_token} ranchercachecksum=${var.rancher_ca_checksum} nodename='kubernetes-worker-${count.index}' nodeip='${var.worker_ips[count.index]}'\""
   }
 
 }

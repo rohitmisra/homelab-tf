@@ -1,7 +1,11 @@
-variable "ssh_key_location" {
+variable "ssh_pvt_key_location" {
   default = "~/.ssh/id_rsa"
 }
 variable "pm_api_url" {
+  default = ""
+}
+
+variable "pm_target_node" {
   default = ""
 }
 
@@ -16,7 +20,7 @@ variable "worker_ips" {
 	  default     = []
 }
 
-variable "ssh_key" {
+variable "TF_VAR_ssh_pub_key" {
   default = ""
 }
 
