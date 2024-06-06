@@ -18,6 +18,7 @@ steps:
       - ls /run/secrets
       - cat -n /run/secrets/secrets.env
       - . /run/secrets/secrets.env
+      - env
       - mkdir $HOME/.ssh
       - echo "$SSH_PVT_KEY" > $HOME/.ssh/id_rsa
       - chmod 600 $HOME/.ssh/id_rsa
