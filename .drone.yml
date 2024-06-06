@@ -10,41 +10,11 @@ steps:
   - name: provision
     image: rohitmisra44/homelab-pipeline-image:1.1.0
     environment:
-      BW_CLIENT_ID:
-        from_secret: BW_CLIENT_ID
-      BW_CLIENT_SECRET:
-        from_secret: BW_CLIENT_SECRET
-      SSH_PVT_KEY: $SSH_PVT_KEY
-      AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
-      AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
-      AWS_REGION: $AWS_REGION
-      PM_API_TOKEN_ID: $PM_API_TOKEN_ID
-      PM_API_TOKEN_SECRET: $PM_API_TOKEN_SECRET
-      TF_VAR_master_ip: $TF_VAR_master_ip
-      TF_VAR_pm_api_url: $TF_VAR_pm_api_url
-      TF_VAR_pm_target_node: $TF_VAR_pm_target_node
-      TF_VAR_rancher_ca_checksum: $TF_VAR_rancher_ca_checksum
-      TF_VAR_rancher_ip: $TF_VAR_rancher_ip
-      TF_VAR_rancher_token: $TF_VAR_rancher_token
-      TF_VAR_worker_ips: $TF_VAR_worker_ips
-      TF_VAR_ssh_pub_key: $TF_VAR_ssh_pub_key
+      BWS_ACCESS_TOKEN:
+        from_secret: BWS_ACCESS_TOKEN
     commands:
-      - export BW_SESSION=$(bw login --apikey --raw)
-      - echo $BW_SESSION
-      - export SSH_PVT_KEY=$(bw get item SSH_PVT_KEY --session $BW_SESSION | jq -r '.fields[] | select(.name=="password") | .value')
-      - export AWS_ACCESS_KEY_ID=$(bw get item AWS_ACCESS_KEY_ID --session $BW_SESSION | jq -r '.fields[] | select(.name=="password") | .value')
-      - export AWS_SECRET_ACCESS_KEY=$(bw get item AWS_SECRET_ACCESS_KEY --session $BW_SESSION | jq -r '.fields[] | select(.name=="password") | .value')
-      - export AWS_REGION=$(bw get item AWS_REGION --session $BW_SESSION | jq -r '.fields[] | select(.name=="password") | .value')
-      - export PM_API_TOKEN_ID=$(bw get item PM_API_TOKEN_ID --session $BW_SESSION | jq -r '.fields[] | select(.name=="password") | .value')
-      - export PM_API_TOKEN_SECRET=$(bw get item PM_API_TOKEN_SECRET --session $BW_SESSION | jq -r '.fields[] | select(.name=="password") | .value')
-      - export TF_VAR_master_ip=$(bw get item TF_VAR_master_ip --session $BW_SESSION | jq -r '.fields[] | select(.name=="password") | .value')
-      - export TF_VAR_pm_api_url=$(bw get item TF_VAR_pm_api_url --session $BW_SESSION | jq -r '.fields[] | select(.name=="password") | .value')
-      - export TF_VAR_pm_target_node=$(bw get item TF_VAR_pm_target_node --session $BW_SESSION | jq -r '.fields[] | select(.name=="password") | .value')
-      - export TF_VAR_rancher_ca_checksum=$(bw get item TF_VAR_rancher_ca_checksum --session $BW_SESSION | jq -r '.fields[] | select(.name=="password") | .value')
-      - export TF_VAR_rancher_ip=$(bw get item TF_VAR_rancher_ip --session $BW_SESSION | jq -r '.fields[] | select(.name=="password") | .value')
-      - export TF_VAR_rancher_token=$(bw get item TF_VAR_rancher_token --session $BW_SESSION | jq -r '.fields[] | select(.name=="password") | .value')
-      - export TF_VAR_worker_ips=$(bw get item TF_VAR_worker_ips --session $BW_SESSION | jq -r '.fields[] | select(.name=="password") | .value')
-      - export TF_VAR_ssh_pub_key=$(bw get item TF_VAR_ssh_pub_key --session $BW_SESSION | jq -r '.fields[] | select(.name=="password") | .value')
+      - bws list secrets | jq -r '.[] | "\(.key)=\(.value | @sh)"' > /tmp/secrets.env
+      - source /tmp/secrets.env && rm /tmp/secrets.env
       - mkdir $HOME/.ssh
       - echo "$SSH_PVT_KEY" > $HOME/.ssh/id_rsa
       - chmod 600 $HOME/.ssh/id_rsa
