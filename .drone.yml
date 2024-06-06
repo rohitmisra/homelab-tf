@@ -14,7 +14,7 @@ steps:
         from_secret: BWS_ACCESS_TOKEN
     commands:
       - bws list secrets | jq -r '.[] | "\(.key)=\(.value | @sh)"' > /tmp/secrets.env
-      - source /tmp/secrets.env && rm /tmp/secrets.env
+      - ./tmp/secrets.env && rm /tmp/secrets.env
       - mkdir $HOME/.ssh
       - echo "$SSH_PVT_KEY" > $HOME/.ssh/id_rsa
       - chmod 600 $HOME/.ssh/id_rsa
