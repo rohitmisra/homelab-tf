@@ -8,7 +8,7 @@ platform:
 
 steps:
   - name: login-and-unlock
-    image: rohitmisra44/homelab-pipeline-image
+    image: rohitmisra44/homelab-pipeline-image:1.1.0
     environment:
       BW_CLIENT_ID:
         from_secret: BW_CLIENT_ID
@@ -21,7 +21,7 @@ steps:
       - echo $BW_SESSION
 
   - name: fetch-secrets
-    image: rohitmisra44/homelab-pipeline-image
+    image: rohitmisra44/homelab-pipeline-image:1.1.0
     environment:
       BW_SESSION: $BW_SESSION
     commands:
@@ -41,7 +41,7 @@ steps:
       - export TF_VAR_ssh_pub_key=$(bw get item TF_VAR_ssh_pub_key --session $BW_SESSION | jq -r '.fields[] | select(.name=="password") | .value')
 
   - name: provision
-    image: rohitmisra44/homelab-pipeline-image
+    image: rohitmisra44/homelab-pipeline-image:1.1.0
     environment:
       SSH_PVT_KEY: $SSH_PVT_KEY
       AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
