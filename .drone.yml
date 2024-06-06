@@ -14,9 +14,9 @@ steps:
         from_secret: BWS_ACCESS_TOKEN
     commands:
       - mkdir /run/secrets
-      - mkdir -p /run/secrets \
-        bws list secrets | jq -r '.[] | "\(.key)=\(.value | @sh)"' > /run/secrets/secrets.env \
-        . /run/secrets/secrets.env \
+      - mkdir -p /run/secrets &&
+        bws list secrets | jq -r '.[] | "\(.key)=\(.value | @sh)"' > /run/secrets/secrets.env &&
+        . /run/secrets/secrets.env &&
         env  # Print the environment variables for debugging
       - mkdir $HOME/.ssh
       - echo "$SSH_PVT_KEY" > $HOME/.ssh/id_rsa
