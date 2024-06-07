@@ -20,7 +20,7 @@ variable "worker_ips" {
 	  default     = []
 }
 
-variable "TF_VAR_ssh_pub_key" {
+variable "ssh_pub_key" {
   default = ""
 }
 
