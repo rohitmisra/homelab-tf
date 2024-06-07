@@ -62,7 +62,7 @@
     command: swapoff -a
     when: ansible_swaptotal_mb > 0
   
-    - name: Ensure Docker is running
+  - name: Ensure Docker is running
     service:
       name: docker
       state: started
