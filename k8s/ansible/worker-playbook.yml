@@ -6,6 +6,7 @@
   - name: Wait for cloud-init / user-data to finish
     command: cloud-init status --wait
     changed_when: false
+
   - name: Install packages that allow apt to be used over HTTPS
     apt:
       name: "{{ packages }}"
@@ -26,7 +27,7 @@
 
   - name: Add apt repository for stable version
     apt_repository:
-      repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable
+      repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable
       state: present
 
   - name: Install docker and its dependecies
@@ -40,12 +41,13 @@
       - docker-ce-cli 
       - containerd.io
     notify:
-      - docker status
+      - Start Docker
 
   - name: Add vagrant user to docker group
     user:
       name: vagrant
       group: docker
+      append: yes
 
   - name: Remove swapfile from /etc/fstab
     mount:
@@ -60,11 +62,20 @@
     command: swapoff -a
     when: ansible_swaptotal_mb > 0
   
+    - name: Ensure Docker is running
+    service:
+      name: docker
+      state: started
+      enabled: yes
+  
   - name: Register with Rancher server
     command: sudo docker run -d --privileged --restart=unless-stopped --net=host -v /etc/kubernetes:/etc/kubernetes -v /var/run:/var/run  rancher/rancher-agent:v2.7.5 --server {{ rancherip }} --token {{ ranchertoken }} --ca-checksum {{ ranchercachecksum }} --node-name {{ nodename }} --address {{ nodeip }} --worker
     
   handlers:
-    - name: docker status
-      service: name=docker state=started
+    - name: Start Docker
+      service:
+        name: docker
+        state: started
+        enabled: yes
 
 
