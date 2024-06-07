@@ -15,7 +15,9 @@ steps:
     commands:
       - mkdir /run/secrets
       - bws list secrets | jq -r '.[] | "echo export \(.key)=$(echo \(.value | @base64))"' > /run/secrets/export_secrets.sh
+      - cat -n /run/secrets/export_secrets.sh
       - sed -i 's/export \(.*\)=\(.*\)/export \1=$(echo \2 | base64 --decode)/' /run/secrets/export_secrets.sh
+      - cat -n /run/secrets/export_secrets.sh
       - chmod +x /run/secrets/export_secrets.sh
       - . /run/secrets/export_secrets.sh
       - env  # Print the environment variables for debugging
