@@ -78,7 +78,7 @@ resource "proxmox_vm_qemu" "k3s_server" {
 resource "proxmox_vm_qemu" "k3s_agent" {
   count             = 2
   name              = "kubernetes-node-${count.index}"
-  target_node       = pm_target_node
+  target_node       = var.pm_target_node
 
   # Activate QEMU agent for this VM
   agent             = 1
@@ -111,7 +111,7 @@ resource "proxmox_vm_qemu" "k3s_agent" {
   ipconfig0         = "ip=${var.worker_ips[count.index]}/24,gw=192.168.178.1"
 
   sshkeys = <<EOF
-  ${var.ssh_key}
+  ${var.ssh_pub_key}
   EOF
 
   #creates ssh connection to check when the VM is ready for ansible provisioning
