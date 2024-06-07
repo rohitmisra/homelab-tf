@@ -13,15 +13,12 @@ steps:
       BWS_ACCESS_TOKEN:
         from_secret: BWS_ACCESS_TOKEN
     commands:
-      - mkdir -p /run/secrets
-      - |
-        bws list secrets | jq -r '.[] | "export (.key)=$'(.value)'"' > /run/secrets/secrets.env
-      - cat /run/secrets/secrets.env  # Debug: Print the contents of the file
-      - echo '#!/bin/sh' > /run/secrets/exec_script.sh
-      - echo '. /run/secrets/secrets.env' >> /run/secrets/exec_script.sh
-      - echo 'echo "Environment variables set successfully!"' >> /run/secrets/exec_script.sh
-      - chmod +x /run/secrets/exec_script.sh
-      - /run/secrets/exec_script.sh
+      - mkdir /run/secrets
+      - bws list secrets | jq -r '.[] | "echo export \(.key)=$(echo \(.value | @base64))"' > /run/secrets/export_secrets.sh
+      - sed -i 's/export \(.*\)=\(.*\)/export \1=$(echo \2 | base64 --decode)/' /run/secrets/export_secrets.sh
+      - chmod +x /run/secrets/export_secrets.sh
+      - . /run/secrets/export_secrets.sh
+      - env  # Print the environment variables for debugging
       - mkdir $HOME/.ssh
       - echo "$SSH_PVT_KEY" > $HOME/.ssh/id_rsa
       - chmod 600 $HOME/.ssh/id_rsa
