@@ -13,26 +13,19 @@ steps:
       BWS_ACCESS_TOKEN:
         from_secret: BWS_ACCESS_TOKEN
     commands:
-     - |
-        bws list secrets | jq -r '.[] | @base64' | while read -r secret; do
-          # Decode the base64 JSON object
-          decoded_secret=$(echo "$secret" | base64 --decode)
-
-          # Extract the key and value from the decoded JSON object
-          key=$(echo "$decoded_secret" | jq -r '.key')
-          value=$(echo "$decoded_secret" | jq -r '.value')
-
-          # Write the export command to the secrets script
-          echo "export $key=\$'$(echo "$value" | sed 's/\'/\\\'/g')'" >> /run/secrets/export_secrets.sh
-        done
+      - mkdir /run/secrets
+      - bws list secrets | jq -r '.[] | "export \(.key)=$(echo \(.value | @base64) | base64 --decode)"' > /run/secrets/export_secrets.sh
+      - cat -n /run/secrets/export_secrets.sh
       - chmod +x /run/secrets/export_secrets.sh
-      - env  # Print the environment variables for debugging
-      - mkdir $HOME/.ssh
-      - echo "$SSH_PVT_KEY" > $HOME/.ssh/id_rsa
-      - chmod 600 $HOME/.ssh/id_rsa
-      - cd k8s/terraform/
-      - terraform init -input=false
-      - terraform apply -input=false -auto-approve
+      - | 
+        . /run/secrets/export_secrets.sh
+        env  # Print the environment variables for debugging
+        mkdir $HOME/.ssh
+        echo "$SSH_PVT_KEY" > $HOME/.ssh/id_rsa
+        chmod 600 $HOME/.ssh/id_rsa
+        cd k8s/terraform/
+        terraform init -input=false
+        terraform apply -input=false -auto-approve
 
 trigger:
   event:
