@@ -1,8 +1,12 @@
 terraform {
   required_providers {
     proxmox = {
-      source = "telmate/proxmox"
+      source  = "telmate/proxmox"
       version = "2.7.4"
+    }
+    ansible = {
+      version = "~> 1.3.0"
+      source  = "ansible/ansible"
     }
   }
   backend "s3" {
@@ -10,6 +14,7 @@ terraform {
     key    = "k8s/state/terraform.tfstate"
   }
 }
+
 provider "proxmox" {
   pm_api_url        = var.pm_api_url
   pm_tls_insecure   = "true"
@@ -69,12 +74,6 @@ resource "proxmox_vm_qemu" "k3s_server" {
   provisioner "remote-exec" {
     inline = ["echo Done!"]
   }
-
-  provisioner "local-exec" {
-    working_dir = "../ansible/"
-    command     = "ansible-playbook --ssh-common-args='-o StrictHostKeyChecking=no' -u ubuntu --key-file ${var.ssh_pvt_key_location} -i '${var.master_ip},' master-playbook.yml --extra-vars \"rancherip=${var.rancher_ip} ranchertoken=${var.rancher_token} ranchercachecksum=${var.rancher_ca_checksum} nodename='kubernetes-master-${count.index}' nodeip='${var.master_ip}'\""
-  }
-
 }
 
 resource "proxmox_vm_qemu" "k3s_agent" {
@@ -129,10 +128,57 @@ resource "proxmox_vm_qemu" "k3s_agent" {
   provisioner "remote-exec" {
     inline = ["echo Done!"]
   }
+}
 
-  provisioner "local-exec" {
-    working_dir = "../ansible/"
-    command     = "ansible-playbook --ssh-common-args='-o StrictHostKeyChecking=no' -u ubuntu --key-file ${var.ssh_pvt_key_location} -i '${var.worker_ips[count.index]},' worker-playbook.yml --extra-vars \"rancherip=${var.rancher_ip} ranchertoken=${var.rancher_token} ranchercachecksum=${var.rancher_ca_checksum} nodename='kubernetes-worker-${count.index}' nodeip='${var.worker_ips[count.index]}'\""
+resource "ansible_host" "master_node" {
+  name = var.master_ip
+  groups = ["master_nodes"]
+  variables = {
+    ansible_user               = "ubuntu"
+    ansible_ssh_private_key    = var.ssh_pvt_key_location
+    ansible_python_interpreter = "/usr/bin/python3"
   }
+}
 
+resource "ansible_host" "worker_nodes" {
+  count = length(var.worker_ips)
+  name  = var.worker_ips[count.index]
+  groups = ["worker_nodes"]
+  variables = {
+    ansible_user               = "ubuntu"
+    ansible_ssh_private_key    = var.ssh_pvt_key_location
+    ansible_python_interpreter = "/usr/bin/python3"
+  }
+}
+
+resource "ansible_playbook" "master_playbook" {
+  playbook_file = "../ansible/master-playbook.yml"
+  inventory     = "${var.master_ip},"
+  user          = "ubuntu"
+  key_file      = var.ssh_pvt_key_location
+  extra_vars = {
+    rancherip         = var.rancher_ip
+    ranchertoken      = var.rancher_token
+    ranchercachecksum = var.rancher_ca_checksum
+    nodename          = "kubernetes-master"
+    nodeip            = var.master_ip
+  }
+  depends_on = [proxmox_vm_qemu.k3s_server, ansible_host.master_node]
+}
+
+resource "ansible_playbook" "worker_playbook" {
+  count = length(var.worker_ips)
+
+  playbook_file = "../ansible/worker-playbook.yml"
+  inventory     = "${var.worker_ips[count.index]},"
+  user          = "ubuntu"
+  key_file      = var.ssh_pvt_key_location
+  extra_vars = {
+    rancherip         = var.rancher_ip
+    ranchertoken      = var.rancher_token
+    ranchercachecksum = var.rancher_ca_checksum
+    nodename          = "kubernetes-worker-${count.index}"
+    nodeip            = var.worker_ips[count.index]
+  }
+  depends_on = [proxmox_vm_qemu.k3s_agent, ansible_host.worker_nodes]
 }
