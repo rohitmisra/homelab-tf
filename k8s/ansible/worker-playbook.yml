@@ -145,7 +145,7 @@
       src: nas-dsm-01:/volume1/homelab
       path: /mnt/nfs
       fstype: nfs
-      opts: rw
+      opts: rw,noauto,user
       state: mounted
 
   handlers:
