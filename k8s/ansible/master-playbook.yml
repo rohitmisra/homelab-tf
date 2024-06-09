@@ -14,11 +14,12 @@
       update_cache: yes
     vars:
       packages:
-      - apt-transport-https
-      - ca-certificates
-      - curl
-      - gnupg-agent
-      - software-properties-common
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - gnupg-agent
+        - software-properties-common
+        - nfs-common  # NFS client package
 
   - name: Add an apt signing key for Docker
     apt_key:
@@ -30,7 +31,7 @@
       repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable
       state: present
 
-  - name: Install docker and its dependecies
+  - name: Install docker and its dependencies
     apt: 
       name: "{{ packages }}"
       state: present
@@ -61,21 +62,38 @@
   - name: Disable swap
     command: swapoff -a
     when: ansible_swaptotal_mb > 0
-  
+
   - name: Ensure Docker is running
     service:
       name: docker
       state: started
       enabled: yes
-  
+
+  - name: Check if Rancher agent is already running
+    command: docker ps --filter "name=rancher-agent" --format "{{.Names}}"
+    register: rancher_agent_running
+    changed_when: false
+
   - name: Register with Rancher server
-    command: sudo docker run -d --privileged --restart=unless-stopped --net=host -v /etc/kubernetes:/etc/kubernetes -v /var/run:/var/run  rancher/rancher-agent:v2.7.5 --server {{ rancherip }} --token {{ ranchertoken }} --ca-checksum {{ ranchercachecksum }} --node-name {{ nodename }} --address {{ nodeip }} --etcd --controlplane
-    
-  handlers:
-    - name: Start Docker
-      service:
-        name: docker
-        state: started
-        enabled: yes
+    command: sudo docker run -d --privileged --restart=unless-stopped --net=host -v /etc/kubernetes:/etc/kubernetes -v /var/run:/var/run rancher/rancher-agent:v2.7.5 --server {{ rancherip }} --token {{ ranchertoken }} --ca-checksum {{ ranchercachecksum }} --node-name {{ nodename }} --address {{ nodeip }} --etcd --controlplane
+    when: rancher_agent_running.stdout == ""
 
+  - name: Create mount directory
+    file:
+      path: /mnt/nfs
+      state: directory
 
+  - name: Mount NFS share
+    mount:
+      src: nas-dsm-01:/homelab
+      path: /mnt/nfs
+      fstype: nfs
+      opts: rw
+      state: mounted
+
+handlers:
+  - name: Start Docker
+    service:
+      name: docker
+      state: started
+      enabled: yes
