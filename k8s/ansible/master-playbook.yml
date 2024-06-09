@@ -91,9 +91,9 @@
       opts: rw
       state: mounted
 
-handlers:
-- name: Start Docker
-  service:
-    name: docker
-    state: started
-    enabled: yes
+  handlers:
+  - name: Start Docker
+    service:
+      name: docker
+      state: started
+      enabled: yes
