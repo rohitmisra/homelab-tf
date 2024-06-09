@@ -70,7 +70,7 @@
       enabled: yes
 
   - name: Check if Rancher agent is already running
-    command: docker ps --filter "name=rancher-agent" --format "{{.Names}}"
+    command: sudo docker ps | grep rancher/hyperkube
     register: rancher_agent_running
     changed_when: false
 
