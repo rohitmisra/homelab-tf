@@ -138,6 +138,7 @@ resource "ansible_host" "master_node" {
     ansible_ssh_private_key    = var.ssh_pvt_key_location
     ansible_python_interpreter = "/usr/bin/python3"
   }
+   depends_on = [proxmox_vm_qemu.k3s_agent]
 }
 
 resource "ansible_host" "worker_nodes" {
@@ -149,9 +150,11 @@ resource "ansible_host" "worker_nodes" {
     ansible_ssh_private_key    = var.ssh_pvt_key_location
     ansible_python_interpreter = "/usr/bin/python3"
   }
+   depends_on = [proxmox_vm_qemu.k3s_agent]
 }
 
 resource "ansible_playbook" "master_playbook" {
+  name          = ansible_host.master_node.name
   playbook_file = "../ansible/master-playbook.yml"
   inventory     = "${var.master_ip},"
   user          = "ubuntu"
@@ -163,12 +166,12 @@ resource "ansible_playbook" "master_playbook" {
     nodename          = "kubernetes-master"
     nodeip            = var.master_ip
   }
-  depends_on = [proxmox_vm_qemu.k3s_server, ansible_host.master_node]
+  depends_on = [ansible_host.master_node]
 }
 
 resource "ansible_playbook" "worker_playbook" {
-  count = length(var.worker_ips)
-
+  count         = length(var.worker_ips)
+  name          = ansible_host.worker_nodes.name
   playbook_file = "../ansible/worker-playbook.yml"
   inventory     = "${var.worker_ips[count.index]},"
   user          = "ubuntu"
@@ -180,5 +183,5 @@ resource "ansible_playbook" "worker_playbook" {
     nodename          = "kubernetes-worker-${count.index}"
     nodeip            = var.worker_ips[count.index]
   }
-  depends_on = [proxmox_vm_qemu.k3s_agent, ansible_host.worker_nodes]
+  depends_on = [ansible_host.worker_nodes]
 }
