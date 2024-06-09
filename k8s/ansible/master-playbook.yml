@@ -70,9 +70,13 @@
       enabled: yes
 
   - name: Check if Rancher agent is already running
-    command: sudo docker ps | grep rancher/hyperkube
+    command: "{{ item }}"
     register: rancher_agent_running
     changed_when: false
+    with_items:
+    - sudo docker ps
+    - grep rancher/hyperkube
+
 
   - name: Register with Rancher server
     command: sudo docker run -d --privileged --restart=unless-stopped --net=host -v /etc/kubernetes:/etc/kubernetes -v /var/run:/var/run rancher/rancher-agent:v2.7.5 --server {{ rancherip }} --token {{ ranchertoken }} --ca-checksum {{ ranchercachecksum }} --node-name {{ nodename }} --address {{ nodeip }} --etcd --controlplane
