@@ -142,7 +142,7 @@
 
   - name: Mount NFS share
     mount:
-      src: nas-dsm-01:/homelab
+      src: nas-dsm-01:/volume1/homelab
       path: /mnt/nfs
       fstype: nfs
       opts: rw
