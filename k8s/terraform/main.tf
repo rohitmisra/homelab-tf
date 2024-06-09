@@ -46,10 +46,12 @@ resource "proxmox_vm_qemu" "k3s_server" {
     bridge          = "vmbr0"
   }
 
-  
-
   # Cloud Init Settings
   ipconfig0         = "ip=${var.master_ip}/24,gw=192.168.178.1"
+  
+  // DNS Settings
+  searchdomain = "fritz.box"
+  nameserver   = "192.168.178.1"
 
   sshkeys = <<EOF
   ${var.ssh_pub_key}
@@ -105,10 +107,11 @@ resource "proxmox_vm_qemu" "k3s_agent" {
     bridge          = "vmbr0"
   }
 
-  
-
   # Cloud Init Settings
   ipconfig0         = "ip=${var.worker_ips[count.index]}/24,gw=192.168.178.1"
+  // DNS Settings
+  searchdomain = "fritz.box"
+  nameserver   = "192.168.178.1"
 
   sshkeys = <<EOF
   ${var.ssh_pub_key}
