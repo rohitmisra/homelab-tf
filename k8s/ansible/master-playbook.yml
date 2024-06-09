@@ -92,8 +92,8 @@
       state: mounted
 
 handlers:
-  - name: Start Docker
-    service:
-      name: docker
-      state: started
-      enabled: yes
+- name: Start Docker
+  service:
+    name: docker
+    state: started
+    enabled: yes
