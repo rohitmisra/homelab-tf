@@ -137,6 +137,7 @@ resource "ansible_host" "master_node" {
     ansible_user               = "ubuntu"
     ansible_ssh_private_key    = var.ssh_pvt_key_location
     ansible_python_interpreter = "/usr/bin/python3"
+    ansible_ssh_common_args    = "-o StrictHostKeyChecking=no"
   }
    depends_on = [proxmox_vm_qemu.k3s_agent]
 }
@@ -149,6 +150,7 @@ resource "ansible_host" "worker_nodes" {
     ansible_user               = "ubuntu"
     ansible_ssh_private_key    = var.ssh_pvt_key_location
     ansible_python_interpreter = "/usr/bin/python3"
+    ansible_ssh_common_args    = "-o StrictHostKeyChecking=no"
   }
    depends_on = [proxmox_vm_qemu.k3s_agent]
 }
