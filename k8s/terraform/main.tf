@@ -170,6 +170,7 @@ resource "ansible_playbook" "master_playbook" {
     nodeip            = var.master_ip
     ansible_ssh_common_args    = "-o StrictHostKeyChecking=no"
     ansible_ssh_extra_args     = "-o StrictHostKeyChecking=no"
+    ansible_user      = "ubuntu"
     //ansible_ssh_common_args    ="'-o StrictHostKeyChecking=no'"
   }
   depends_on = [ansible_host.master_node]
@@ -187,6 +188,7 @@ resource "ansible_playbook" "worker_playbook" {
     nodeip            = var.worker_ips[count.index]
     ansible_ssh_common_args    = "-o StrictHostKeyChecking=no"
     ansible_ssh_extra_args     = "-o StrictHostKeyChecking=no"
+    ansible_user      = "ubuntu"
     //ansible_ssh_common_args    ="'-o StrictHostKeyChecking=no'"
   }
   depends_on = [ansible_host.worker_nodes]
