@@ -155,10 +155,7 @@ resource "ansible_host" "worker_nodes" {
 
 resource "ansible_playbook" "master_playbook" {
   name          = ansible_host.master_node.name
-  playbook_file = "../ansible/master-playbook.yml"
-  inventory     = "${var.master_ip},"
-  user          = "ubuntu"
-  key_file      = var.ssh_pvt_key_location
+  playbook      = "../ansible/master-playbook.yml"
   extra_vars = {
     rancherip         = var.rancher_ip
     ranchertoken      = var.rancher_token
@@ -171,11 +168,8 @@ resource "ansible_playbook" "master_playbook" {
 
 resource "ansible_playbook" "worker_playbook" {
   count         = length(var.worker_ips)
-  name          = ansible_host.worker_nodes.name
-  playbook_file = "../ansible/worker-playbook.yml"
-  inventory     = "${var.worker_ips[count.index]},"
-  user          = "ubuntu"
-  key_file      = var.ssh_pvt_key_location
+  name          = ansible_host.worker_nodes[count.index].name
+  playbook      = "../ansible/worker-playbook.yml"
   extra_vars = {
     rancherip         = var.rancher_ip
     ranchertoken      = var.rancher_token
