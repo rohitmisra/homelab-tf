@@ -86,10 +86,10 @@
       state: directory
 
   - name: Unmount existing NFS share
-      mount:
-        path: /mnt/nfs
-        state: unmounted
-      ignore_errors: true  # Continue even if the unmount fails
+    mount:
+      path: /mnt/nfs
+      state: unmounted
+    ignore_errors: true  # Continue even if the unmount fails
 
   - name: Mount NFS share
     mount:
