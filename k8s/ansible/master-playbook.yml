@@ -88,7 +88,7 @@
     mount:
       path: /mnt/nfs
       state: unmounted
-      ignore_errors: true  # Continue even if the unmount fails
+    ignore_errors: true  # Continue even if the unmount fails
 
   - name: Mount NFS share
     mount:

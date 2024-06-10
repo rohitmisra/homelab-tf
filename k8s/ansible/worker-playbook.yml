@@ -85,6 +85,12 @@
       path: /mnt/nfs
       state: directory
 
+  - name: Unmount existing NFS share
+      mount:
+        path: /mnt/nfs
+        state: unmounted
+      ignore_errors: true  # Continue even if the unmount fails
+
   - name: Mount NFS share
     mount:
       src: nas-dsm-01:/volume1/homelab-k8s
