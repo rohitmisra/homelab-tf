@@ -147,6 +147,14 @@
       fstype: nfs
       opts: rw,noauto,user
       state: mounted
+      
+  - name: Ensure correct permissions on NFS mount directory
+    file:
+      path: /mnt/nfs
+      state: directory
+      owner: ubuntu
+      group: ubuntu
+      mode: '0775'
 
   handlers:
   - name: Start Docker
