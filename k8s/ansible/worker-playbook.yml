@@ -142,12 +142,12 @@
 
   - name: Mount NFS share
     mount:
-      src: nas-dsm-01:/volume1/homelab
+      src: nas-dsm-01:/volume1/homelab-k8s
       path: /mnt/nfs
       fstype: nfs
       opts: rw,noauto,user
       state: mounted
-      
+
   - name: Ensure correct permissions on NFS mount directory
     file:
       path: /mnt/nfs
