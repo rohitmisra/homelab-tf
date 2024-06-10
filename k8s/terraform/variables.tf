@@ -39,7 +39,7 @@ variable "rancher_ca_checksum" {
 	  default     = ""
 }
 
-variable "TF_VAR_k8s_nfs_storage" {
+variable "k8s_nfs_storage" {
     description = "path of the nfs mount"
     default     = ""
 }
