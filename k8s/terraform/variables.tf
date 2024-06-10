@@ -38,3 +38,8 @@ variable "rancher_ca_checksum" {
     description = "CA Checksum for Rancher access"
 	  default     = ""
 }
+
+variable "TF_VAR_k8s_nfs_storage" {
+    description = "path of the nfs mount"
+    default     = ""
+}

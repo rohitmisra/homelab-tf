@@ -171,7 +171,7 @@ resource "ansible_playbook" "master_playbook" {
     ansible_ssh_common_args    = "-o StrictHostKeyChecking=no"
     ansible_ssh_extra_args     = "-o StrictHostKeyChecking=no"
     ansible_user      = "ubuntu"
-    //ansible_ssh_common_args    ="'-o StrictHostKeyChecking=no'"
+    k8snfsstorage     = var.k8s_nfs_storage
   }
   depends_on = [ansible_host.master_node]
 }
@@ -189,7 +189,7 @@ resource "ansible_playbook" "worker_playbook" {
     ansible_ssh_common_args    = "-o StrictHostKeyChecking=no"
     ansible_ssh_extra_args     = "-o StrictHostKeyChecking=no"
     ansible_user      = "ubuntu"
-    //ansible_ssh_common_args    ="'-o StrictHostKeyChecking=no'"
+    k8snfsstorage     = var.k8s_nfs_storage
   }
   depends_on = [ansible_host.worker_nodes]
 }
