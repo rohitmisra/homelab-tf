@@ -3,21 +3,10 @@
   become: yes
   become_user: root
   tasks:
-  - name: Debug - Starting Cloud-Init Wait
-    debug:
-      msg: "Starting Cloud-Init Wait"
 
   - name: Wait for cloud-init / user-data to finish
     command: cloud-init status --wait
     changed_when: false
-
-  - name: Debug - Finished Cloud-Init Wait
-    debug:
-      msg: "Finished Cloud-Init Wait"
-
-  - name: Debug - Starting Package Installation
-    debug:
-      msg: "Starting Package Installation"
 
   - name: Install packages that allow apt to be used over HTTPS
     apt:
@@ -33,39 +22,15 @@
         - software-properties-common
         - nfs-common  # NFS client package
 
-  - name: Debug - Finished Package Installation
-    debug:
-      msg: "Finished Package Installation"
-
-  - name: Debug - Adding Docker Apt Signing Key
-    debug:
-      msg: "Adding Docker Apt Signing Key"
-
   - name: Add an apt signing key for Docker
     apt_key:
       url: https://download.docker.com/linux/ubuntu/gpg
       state: present
 
-  - name: Debug - Finished Adding Docker Apt Signing Key
-    debug:
-      msg: "Finished Adding Docker Apt Signing Key"
-
-  - name: Debug - Adding Docker Apt Repository
-    debug:
-      msg: "Adding Docker Apt Repository"
-
   - name: Add apt repository for stable version
     apt_repository:
       repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable
       state: present
-
-  - name: Debug - Finished Adding Docker Apt Repository
-    debug:
-      msg: "Finished Adding Docker Apt Repository"
-
-  - name: Debug - Starting Docker Installation
-    debug:
-      msg: "Starting Docker Installation"
 
   - name: Install docker and its dependencies
     apt: 
@@ -79,10 +44,6 @@
         - containerd.io
     notify:
       - Start Docker
-
-  - name: Debug - Finished Docker Installation
-    debug:
-      msg: "Finished Docker Installation"
 
   - name: Add vagrant user to docker group
     user:
@@ -109,36 +70,20 @@
       state: started
       enabled: yes
 
-  - name: Debug - Checking Rancher Agent
-    debug:
-      msg: "Checking if Rancher agent is already running"
-
   - name: Check if Rancher agent is already running
     shell: sudo docker ps | grep rancher/hyperkube
     register: rancher_agent_running
     changed_when: false
     ignore_errors: yes
 
-  - name: Debug - Rancher Agent Check Done
-    debug:
-      msg: "Rancher agent running status: {{ rancher_agent_running }}"
-
   - name: Register with Rancher server
     command: sudo docker run -d --privileged --restart=unless-stopped --net=host -v /etc/kubernetes:/etc/kubernetes -v /var/run:/var/run rancher/rancher-agent:v2.7.5 --server {{ rancherip }} --token {{ ranchertoken }} --ca-checksum {{ ranchercachecksum }} --node-name {{ nodename }} --address {{ nodeip }} --worker
     when: rancher_agent_running.stdout == ""
-
-  - name: Debug - Creating Mount Directory
-    debug:
-      msg: "Creating Mount Directory"
 
   - name: Create mount directory
     file:
       path: /mnt/nfs
       state: directory
-
-  - name: Debug - Mounting NFS Share
-    debug:
-      msg: "Mounting NFS Share"
 
   - name: Mount NFS share
     mount:
