@@ -128,14 +128,13 @@
       state: mounted
   
   - name: Ensure the ubuntu user owns the NFS mount directory
-    file:
+    acl:
       path: /mnt/nfs
-      state: directory
-      owner: ubuntu
-      group: ubuntu
-      recurse: yes
-    become: yes
-    become_user: root
+      entity: ubuntu
+      etype: user
+      permissions: rwx
+      state: present
+
 
   handlers:
   - name: Start Docker
