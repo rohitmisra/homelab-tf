@@ -127,14 +127,13 @@
       opts: rw
       state: mounted
   
-  - name: Ensure the ubuntu user owns the NFS mount directory
-    acl:
+  - name: Ensure correct permissions on NFS mount directory
+    file:
       path: /mnt/nfs
-      entity: ubuntu
-      etype: user
-      permissions: rwx
-      state: present
-
+      state: directory
+      owner: ubuntu
+      group: ubuntu
+      mode: '0775'
 
   handlers:
   - name: Start Docker
