@@ -124,8 +124,18 @@
       src: nas-dsm-01:/volume1/homelab-k8s
       path: /mnt/nfs
       fstype: nfs
-      opts: rw,noauto,user
+      opts: rw
       state: mounted
+  
+  - name: Ensure the ubuntu user owns the NFS mount directory
+    file:
+      path: /mnt/nfs
+      state: directory
+      owner: ubuntu
+      group: ubuntu
+      recurse: yes
+    become: yes
+    become_user: root
 
   handlers:
   - name: Start Docker
